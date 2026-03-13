@@ -5,9 +5,10 @@ const sql = neon(process.env.DATABASE_URL!)
 // POST /api/topup
 // Body: { target_source_name, from_source_name, amount, name, transaction_date }
 //
-// Creates 2 transactions atomically:
-//   1. target envelop  → closing_balance + amount  (positive)
-//   2. account envelop → closing_balance - amount  (negative)
+// Bank-style atomic transfer:
+//   Step 1: Validate both balances (pre-flight, outside transaction)
+//   Step 2: DEBIT account first, then CREDIT target — inside ONE db transaction
+//   Step 3: If either INSERT fails → entire transaction rolls back automatically
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -29,52 +30,61 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Get latest closing_balance for BOTH envelops in one query
-    const [balances] = await sql`
-      SELECT
-        MAX(CASE WHEN source_name = ${target_source_name} THEN closing_balance END) AS target_balance,
-        MAX(CASE WHEN source_name = ${from_source_name}   THEN closing_balance END) AS from_balance
-      FROM (
-        SELECT DISTINCT ON (source_name) source_name, closing_balance
-        FROM transactions
-        WHERE source_name IN (${target_source_name}, ${from_source_name})
-        ORDER BY source_name, transaction_date DESC, id DESC
-      ) latest
+    // ── Pre-flight: get latest balances (before we touch anything) ──────────
+    const targetRows = await sql`
+      SELECT closing_balance FROM transactions
+      WHERE source_name = ${target_source_name}
+      ORDER BY transaction_date DESC, id DESC LIMIT 1
+    `
+    const fromRows = await sql`
+      SELECT closing_balance FROM transactions
+      WHERE source_name = ${from_source_name}
+      ORDER BY transaction_date DESC, id DESC LIMIT 1
     `
 
-    const targetPrev = parseFloat(balances.target_balance ?? '0')
-    const fromPrev   = parseFloat(balances.from_balance   ?? '0')
+    const targetPrev = parseFloat(targetRows[0]?.closing_balance ?? '0')
+    const fromPrev   = parseFloat(fromRows[0]?.closing_balance   ?? '0')
 
+    // ── Validate funds before touching anything ──────────────────────────────
     if (fromPrev < amt) {
-      return res.status(400).json({ ok: false, error: `Insufficient balance in "${from_source_name}". Available: ${fromPrev}` })
+      return res.status(400).json({
+        ok: false,
+        error: `Insufficient balance in "${from_source_name}". Available: ₹${fromPrev.toFixed(2)}`,
+      })
     }
 
-    const today = transaction_date
     const txName = name || ''
 
-    // Insert both transactions
-    const [t1, t2] = await Promise.all([
-      // Credit target envelop
+    // ── Atomic DB transaction: DEDUCT first, then CREDIT ────────────────────
+    // If the credit INSERT fails for any reason, the debit is auto-rolled back.
+    // Neither row will exist in the DB unless BOTH succeed.
+    const [debitResult, creditResult] = await sql.transaction([
+      // 1. Deduct from account envelop first
       sql`
         INSERT INTO transactions (created_at, transaction_date, source_name, amount, closing_balance, name)
-        VALUES (NOW(), ${today}, ${target_source_name}, ${amt}, ${targetPrev + amt}, ${txName})
+        VALUES (NOW(), ${transaction_date}, ${from_source_name}, ${-amt}, ${fromPrev - amt}, ${txName})
         RETURNING *
       `,
-      // Debit account envelop
+      // 2. Credit target envelop
       sql`
         INSERT INTO transactions (created_at, transaction_date, source_name, amount, closing_balance, name)
-        VALUES (NOW(), ${today}, ${from_source_name}, ${-amt}, ${fromPrev - amt}, ${txName})
+        VALUES (NOW(), ${transaction_date}, ${target_source_name}, ${amt}, ${targetPrev + amt}, ${txName})
         RETURNING *
       `,
     ])
 
     return res.status(201).json({
       ok: true,
-      message: `Topped up "${target_source_name}" with ₹${amt} from "${from_source_name}"`,
-      transactions: [t1[0], t2[0]],
+      message: `Transferred ₹${amt} from "${from_source_name}" → "${target_source_name}"`,
+      debit:  debitResult[0],
+      credit: creditResult[0],
     })
+
   } catch (error) {
-    console.error('Topup API error', error)
+    // Gets here if:
+    //   - DB transaction rolled back (both inserts undone)
+    //   - Network/connection error
+    console.error('Topup API error — transaction rolled back', error)
     return res.status(500).json({
       ok: false,
       error: error instanceof Error ? error.message : String(error),
