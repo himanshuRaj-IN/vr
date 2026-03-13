@@ -8,9 +8,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Single query: fetch all active envelops + their latest transaction's
-    // closing_balance via a LATERAL JOIN. One DB round-trip regardless of
-    // how many envelops exist.
+    // Single query: all active envelops + latest transaction's closing_balance
+    // One DB round-trip regardless of how many envelops exist
     const rows = await sql`
       SELECT
         e.id,
@@ -29,7 +28,16 @@ export default async function handler(req: any, res: any) {
       WHERE e.is_active = true
       ORDER BY e.type, e.source_name
     `
-    return res.status(200).json({ ok: true, data: rows })
+
+    // Also fetch account envelops list separately for topup dropdown
+    const accounts = await sql`
+      SELECT id, source_name
+      FROM envelops
+      WHERE is_active = true AND type = 'Account'
+      ORDER BY source_name
+    `
+
+    return res.status(200).json({ ok: true, data: rows, accounts })
   } catch (error) {
     console.error('Dashboard API error', error)
     return res.status(500).json({
