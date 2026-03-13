@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || '' // empty uses same origin (works in production on Vercel)
 
 const App = () => {
   const [rows, setRows] = useState<any[]>([])
