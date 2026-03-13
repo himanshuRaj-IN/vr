@@ -20,7 +20,7 @@ export default async function handler(req: any, res: any) {
     return
   }
 
-  const { query, params } = req.body ?? {}
+  const { query } = req.body ?? {}
   if (!query || typeof query !== 'string') {
     res.status(400).json({ ok: false, error: 'Missing query string' })
     return
@@ -33,7 +33,7 @@ export default async function handler(req: any, res: any) {
 
   try {
     const result = await sql.transaction((tx: any) => {
-      return [tx(query, Array.isArray(params) ? params : [])]
+      return [tx(query)]
     })
 
     res.status(200).json({ ok: true, result })
