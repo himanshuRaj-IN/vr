@@ -8,15 +8,16 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Single query: all active envelops + latest transaction's closing_balance
-    // One DB round-trip regardless of how many envelops exist
     const rows = await sql`
       SELECT
         e.id,
         e.source_name,
         e.type,
+        e.timeframe,
         t.closing_balance  AS last_balance,
-        t.transaction_date AS last_date
+        t.transaction_date AS last_date,
+        s.topup_total,
+        s.expense_total
       FROM envelops e
       LEFT JOIN LATERAL (
         SELECT closing_balance, transaction_date
@@ -25,11 +26,19 @@ export default async function handler(req: any, res: any) {
         ORDER BY transaction_date DESC, id DESC
         LIMIT 1
       ) t ON true
+      LEFT JOIN LATERAL (
+        SELECT
+          COALESCE(SUM(CASE WHEN amount > 0 THEN amount      ELSE 0 END), 0) AS topup_total,
+          COALESCE(SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END), 0) AS expense_total
+        FROM transactions
+        WHERE source_name = e.source_name
+          AND e.timeframe IS NOT NULL
+          AND transaction_date >= CURRENT_DATE - (e.timeframe || ' days')::INTERVAL
+      ) s ON true
       WHERE e.is_active = true
       ORDER BY e.type, e.source_name
     `
 
-    // Also fetch account envelops list separately for topup dropdown
     const accounts = await sql`
       SELECT id, source_name
       FROM envelops

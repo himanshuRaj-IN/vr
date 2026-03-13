@@ -17,15 +17,15 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'POST') {
-      const { source_name, type, is_active } = req.body || {};
+      const { source_name, type, is_active, timeframe } = req.body || {};
       if (!source_name || !type) {
         return res.status(400).json({ ok: false, error: 'Missing required fields: source_name, type' });
       }
-      // true is fallback default if is_active not provided
       const activeStatus = is_active !== undefined ? is_active : true;
+      const tf = timeframe != null && timeframe !== '' ? parseInt(timeframe) : null;
       const rows = await sql`
-        INSERT INTO envelops (source_name, type, is_active) 
-        VALUES (${source_name}, ${type}, ${activeStatus}) 
+        INSERT INTO envelops (source_name, type, is_active, timeframe)
+        VALUES (${source_name}, ${type}, ${activeStatus}, ${tf})
         RETURNING *
       `
       return res.status(201).json({ ok: true, data: rows[0] })
@@ -33,13 +33,15 @@ export default async function handler(req: any, res: any) {
 
     if (req.method === 'PUT') {
       if (!id) return res.status(400).json({ ok: false, error: 'id query parameter is required' });
-      const { source_name, type, is_active } = req.body || {};
+      const { source_name, type, is_active, timeframe } = req.body || {};
+      const tf = timeframe != null && timeframe !== '' ? parseInt(timeframe) : null;
       const rows = await sql`
-        UPDATE envelops 
-        SET 
+        UPDATE envelops
+        SET
           source_name = COALESCE(${source_name ?? null}, source_name),
-          type = COALESCE(${type ?? null}, type),
-          is_active = COALESCE(${is_active ?? null}, is_active)
+          type        = COALESCE(${type       ?? null}, type),
+          is_active   = COALESCE(${is_active  ?? null}, is_active),
+          timeframe   = COALESCE(${tf}, timeframe)
         WHERE id = ${id} RETURNING *
       `
       return res.status(200).json({ ok: true, data: rows[0] })
