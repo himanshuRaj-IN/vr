@@ -16,19 +16,28 @@ See [Vite Configuration Reference](https://vitejs.dev/config/).
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Development (Frontend + Serverless ready)
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+Local APIs: Use `VITE_API_URL=http://localhost:3001 npm run dev` with server.js temp or deploy to Vercel.
+
+### Build
 
 ```sh
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Deploy to Vercel
+
+```sh
+npm run deploy
+vercel env add DATABASE_URL
+```
+
+### Lint
 
 ```sh
 npm run lint
