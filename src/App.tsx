@@ -1,24 +1,33 @@
 import { useState } from 'react'
-import sql from './lib/db'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 const App = () => {
-  const [data, setData] = useState<any[]>([])
+  const [rows, setRows] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  const testConnection = async () => {
+  const loadTransactions = async () => {
     try {
-      const result = await sql`SELECT 1 as test`
-      setData(result)
-      console.log('DB connected:', result)
-    } catch (error) {
-      console.error('DB error:', error)
+      setError(null)
+      const res = await fetch(`${API_URL}/api/transactions`)
+      const body = await res.json()
+      if (!res.ok) throw new Error(body?.error || 'Failed to load')
+      setRows(body.rows ?? [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
     }
   }
 
   return (
     <div className="card">
       <h1>Hello Himanshu</h1>
-      <button onClick={testConnection}>Test DB Connection</button>
-      {data.length > 0 && <p>DB Response: {JSON.stringify(data)}</p>}
+      <button onClick={loadTransactions}>Load transactions</button>
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {rows.length > 0 && (
+        <pre style={{ textAlign: 'left', maxHeight: '240px', overflow: 'auto' }}>
+          {JSON.stringify(rows, null, 2)}
+        </pre>
+      )}
     </div>
   )
 }
