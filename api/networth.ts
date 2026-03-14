@@ -31,7 +31,7 @@ export default async function handler(req: any, res: any) {
           FROM transactions t
           JOIN envelops e ON e.source_name = t.source_name AND e.is_active = true
           WHERE t.transaction_date >= CURRENT_DATE - (${days} || ' days')::interval
-          ORDER BY t.transaction_date ASC, t.id ASC
+          ORDER BY t.id ASC
         `
       : await sql`
           SELECT
@@ -44,7 +44,7 @@ export default async function handler(req: any, res: any) {
             e.type AS envelope_type
           FROM transactions t
           JOIN envelops e ON e.source_name = t.source_name AND e.is_active = true
-          ORDER BY t.transaction_date ASC, t.id ASC
+          ORDER BY t.id ASC
         `
 
     // Step 3: Group by date, compute running net worth

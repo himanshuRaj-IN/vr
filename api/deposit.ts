@@ -39,7 +39,7 @@ export default async function handler(req: any, res: any) {
       SELECT closing_balance
       FROM transactions
       WHERE source_name = ${source_name}
-      ORDER BY transaction_date DESC, id DESC
+      ORDER BY id DESC
       LIMIT 1
     `
 

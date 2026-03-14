@@ -27,7 +27,7 @@ export default async function handler(req: any, res: any) {
         SELECT closing_balance, transaction_date
         FROM transactions
         WHERE source_name = e.source_name
-        ORDER BY transaction_date DESC, id DESC
+        ORDER BY id DESC
         LIMIT 1
       ) t ON true
       LEFT JOIN LATERAL (
@@ -45,7 +45,7 @@ export default async function handler(req: any, res: any) {
           SELECT closing_balance, transaction_date, id
           FROM transactions
           WHERE source_name = e.source_name
-          ORDER BY transaction_date DESC, id DESC
+          ORDER BY id DESC
           LIMIT 12
         ) h
       ) h ON true

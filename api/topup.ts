@@ -34,12 +34,12 @@ export default async function handler(req: any, res: any) {
     const targetRows = await sql`
       SELECT closing_balance FROM transactions
       WHERE source_name = ${target_source_name}
-      ORDER BY transaction_date DESC, id DESC LIMIT 1
+      ORDER BY id DESC LIMIT 1
     `
     const fromRows = await sql`
       SELECT closing_balance FROM transactions
       WHERE source_name = ${from_source_name}
-      ORDER BY transaction_date DESC, id DESC LIMIT 1
+      ORDER BY id DESC LIMIT 1
     `
 
     const targetPrev = parseFloat(targetRows[0]?.closing_balance ?? '0')
