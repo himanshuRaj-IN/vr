@@ -18,13 +18,13 @@ export default async function handler(req: any, res: any) {
         e.target_date,
         e.is_active,
         t.closing_balance  AS last_balance,
-        t.transaction_date AS last_date,
+        t.created_at       AS last_date,
         s.topup_total,
         s.expense_total,
         h.balance_history
       FROM envelops e
       LEFT JOIN LATERAL (
-        SELECT closing_balance, transaction_date
+        SELECT closing_balance, transaction_date, created_at
         FROM transactions
         WHERE source_name = e.source_name
         ORDER BY id DESC
