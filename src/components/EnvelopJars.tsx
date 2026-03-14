@@ -553,8 +553,27 @@ const EnvelopJars = () => {
   if (!hasAnyEnvelops)
     return <p className="empty-text">No active envelops. Go to <strong>Settings</strong> to create some!</p>
 
+  const liquidCashTypes = ['Account', 'Expense', 'Savings', 'Goal']
+  const liquidCash = Object.keys(grouped)
+    .filter(type => liquidCashTypes.includes(type))
+    .reduce((total, type) => 
+      total + grouped[type].reduce((sum, e) => sum + parseFloat(e.last_balance || '0'), 0)
+    , 0)
+
   return (
     <div className="envelop-jars-root">
+      {/* Liquid Cash Stats */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="label">Total Liquid Cash</div>
+          <div className="value" style={{ color: 'var(--success)' }}>
+            ₹{liquidCash.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '4px' }}>
+            Accounts + Left Expenses + Savings + Goals
+          </div>
+        </div>
+      </div>
 
 
       {ROW_CONFIG.map((rowTypes, idx) => {
