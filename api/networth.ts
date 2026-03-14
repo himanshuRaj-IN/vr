@@ -6,59 +6,75 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'GET only' })
 
   try {
+    const days = parseInt(req.query.days ?? '90', 10) // 0 = all time
+
     // Step 1: Get all active envelope names + types
     const envelops = await sql`
       SELECT source_name, type FROM envelops WHERE is_active = true
     `
-    // Build sign map: +1 for assets, -1 for liabilities
     const signMap: Record<string, number> = {}
     for (const e of envelops) {
       signMap[e.source_name] = e.type === 'Owe' ? -1 : 1
     }
 
-    // Step 2: Get last 90 days of transactions
-    const txns = await sql`
-      SELECT
-        t.id,
-        t.transaction_date::text AS date,
-        t.source_name,
-        t.name,
-        t.amount,
-        t.closing_balance,
-        e.type AS envelope_type
-      FROM transactions t
-      JOIN envelops e ON e.source_name = t.source_name AND e.is_active = true
-      WHERE t.transaction_date >= CURRENT_DATE - INTERVAL '90 days'
-      ORDER BY t.transaction_date ASC, t.id ASC
-    `
+    // Step 2: Get transactions (all time or last N days)
+    const txns = days > 0
+      ? await sql`
+          SELECT
+            t.id,
+            t.transaction_date::text AS date,
+            t.source_name,
+            t.name,
+            t.amount,
+            t.closing_balance,
+            e.type AS envelope_type
+          FROM transactions t
+          JOIN envelops e ON e.source_name = t.source_name AND e.is_active = true
+          WHERE t.transaction_date >= CURRENT_DATE - (${days} || ' days')::interval
+          ORDER BY t.transaction_date ASC, t.id ASC
+        `
+      : await sql`
+          SELECT
+            t.id,
+            t.transaction_date::text AS date,
+            t.source_name,
+            t.name,
+            t.amount,
+            t.closing_balance,
+            e.type AS envelope_type
+          FROM transactions t
+          JOIN envelops e ON e.source_name = t.source_name AND e.is_active = true
+          ORDER BY t.transaction_date ASC, t.id ASC
+        `
 
-    // Step 3: For each unique date, compute net worth as sum of latest closing balance per envelope
-    // Group transactions by date
+    // Step 3: Group by date, compute running net worth
     const byDate: Record<string, any[]> = {}
     for (const txn of txns) {
       if (!byDate[txn.date]) byDate[txn.date] = []
       byDate[txn.date].push(txn)
     }
 
-    // Track latest closing balance per envelope (running)
-    const latestBal: Record<string, number> = {}
+    const latestBal: Record<string, { balance: number; type: string }> = {}
     const result = []
 
     for (const date of Object.keys(byDate).sort()) {
       const dayTxns = byDate[date]
       for (const txn of dayTxns) {
-        latestBal[txn.source_name] = parseFloat(txn.closing_balance || '0')
+        latestBal[txn.source_name] = {
+          balance: parseFloat(txn.closing_balance || '0'),
+          type: txn.envelope_type,
+        }
       }
 
-      // Compute net worth from latest balances
-      let netWorth = 0
-      for (const [name, bal] of Object.entries(latestBal)) {
-        netWorth += bal * (signMap[name] ?? 1)
+      // Compute net worth grouped by type (so frontend can toggle types)
+      const byType: Record<string, number> = {}
+      for (const [, { balance, type }] of Object.entries(latestBal)) {
+        byType[type] = (byType[type] || 0) + balance
       }
 
       result.push({
         date,
-        net_worth: netWorth,
+        by_type: byType,
         transactions: dayTxns.map(t => ({
           source_name:   t.source_name,
           txn_name:      t.name,
