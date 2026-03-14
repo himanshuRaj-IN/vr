@@ -562,18 +562,7 @@ const EnvelopJars = () => {
 
   return (
     <div className="envelop-jars-root">
-      {/* Liquid Cash Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="label">Total Liquid Cash</div>
-          <div className="value" style={{ color: 'var(--success)' }}>
-            ₹{liquidCash.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '4px' }}>
-            Accounts + Left Expenses + Savings + Goals
-          </div>
-        </div>
-      </div>
+
 
 
       {ROW_CONFIG.map((rowTypes, idx) => {
@@ -637,6 +626,26 @@ const EnvelopJars = () => {
           </div>
         )
       })}
+
+      {/* Liquid Cash Console Style */}
+      <div style={{ 
+        marginTop: '60px', 
+        padding: '24px 0', 
+        borderTop: '1px solid rgba(255,255,255,0.03)', 
+        fontFamily: "'JetBrains Mono', 'Fira Code', monospace", 
+        fontSize: '0.72rem', 
+        color: '#555',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '20px',
+        letterSpacing: '0.2px',
+        textTransform: 'uppercase'
+      }}>
+        <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>$ system_info</span>
+        <span style={{ color: 'var(--text)' }}>LIQUID_CASH: ₹{liquidCash.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+        <span style={{ opacity: 0.6 }}>[ACC + XP_LEFT + SAV + GOAL]</span>
+      </div>
     </div>
   )
 }
