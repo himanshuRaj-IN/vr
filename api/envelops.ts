@@ -17,15 +17,16 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'POST') {
-      const { source_name, type, is_active, timeframe } = req.body || {};
+      const { source_name, type, is_active, timeframe, default_budget } = req.body || {};
       if (!source_name || !type) {
         return res.status(400).json({ ok: false, error: 'Missing required fields: source_name, type' });
       }
       const activeStatus = is_active !== undefined ? is_active : true;
       const tf = timeframe != null && timeframe !== '' ? parseInt(timeframe) : null;
+      const budget = default_budget != null && default_budget !== '' ? parseFloat(default_budget) : null;
       const rows = await sql`
-        INSERT INTO envelops (source_name, type, is_active, timeframe)
-        VALUES (${source_name}, ${type}, ${activeStatus}, ${tf})
+        INSERT INTO envelops (source_name, type, is_active, timeframe, default_budget)
+        VALUES (${source_name}, ${type}, ${activeStatus}, ${tf}, ${budget})
         RETURNING *
       `
       return res.status(201).json({ ok: true, data: rows[0] })
@@ -33,15 +34,17 @@ export default async function handler(req: any, res: any) {
 
     if (req.method === 'PUT') {
       if (!id) return res.status(400).json({ ok: false, error: 'id query parameter is required' });
-      const { source_name, type, is_active, timeframe } = req.body || {};
+      const { source_name, type, is_active, timeframe, default_budget } = req.body || {};
       const tf = timeframe != null && timeframe !== '' ? parseInt(timeframe) : null;
+      const budget = default_budget != null && default_budget !== '' ? parseFloat(default_budget) : null;
       const rows = await sql`
         UPDATE envelops
         SET
           source_name = COALESCE(${source_name ?? null}, source_name),
           type        = COALESCE(${type       ?? null}, type),
           is_active   = COALESCE(${is_active  ?? null}, is_active),
-          timeframe   = COALESCE(${tf}, timeframe)
+          timeframe   = COALESCE(${tf}, timeframe),
+          default_budget = COALESCE(${budget}, default_budget)
         WHERE id = ${id} RETURNING *
       `
       return res.status(200).json({ ok: true, data: rows[0] })
