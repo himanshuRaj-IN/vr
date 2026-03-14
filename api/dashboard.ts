@@ -16,6 +16,7 @@ export default async function handler(req: any, res: any) {
         e.timeframe,
         e.target_amount,
         e.target_date,
+        e.is_active,
         t.closing_balance  AS last_balance,
         t.transaction_date AS last_date,
         s.topup_total,
