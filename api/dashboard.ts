@@ -14,10 +14,13 @@ export default async function handler(req: any, res: any) {
         e.source_name,
         e.type,
         e.timeframe,
+        e.target_amount,
+        e.target_date,
         t.closing_balance  AS last_balance,
         t.transaction_date AS last_date,
         s.topup_total,
-        s.expense_total
+        s.expense_total,
+        h.balance_history
       FROM envelops e
       LEFT JOIN LATERAL (
         SELECT closing_balance, transaction_date
@@ -35,6 +38,16 @@ export default async function handler(req: any, res: any) {
           AND e.timeframe IS NOT NULL
           AND transaction_date >= CURRENT_DATE - (e.timeframe || ' days')::INTERVAL
       ) s ON true
+      LEFT JOIN LATERAL (
+        SELECT json_agg(h.closing_balance ORDER BY h.transaction_date ASC, h.id ASC) AS balance_history
+        FROM (
+          SELECT closing_balance, transaction_date, id
+          FROM transactions
+          WHERE source_name = e.source_name
+          ORDER BY transaction_date DESC, id DESC
+          LIMIT 12
+        ) h
+      ) h ON true
       WHERE e.is_active = true
       ORDER BY e.type, e.source_name
     `
