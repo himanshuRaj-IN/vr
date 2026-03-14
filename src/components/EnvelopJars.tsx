@@ -200,7 +200,7 @@ const ActionBtns = ({
 }
 
 // ─── ACCOUNT CARD ─────────────────────────────────────────────────────────────
-const AccountCard = ({ env, onDeposit }: { env: EnvelopRow; onDeposit: () => void }) => (
+const AccountCard = ({ env, onDeposit, onTopup }: { env: EnvelopRow; onDeposit: () => void; onTopup: () => void }) => (
   <div className="env-card env-account">
     <div className="env-account-left">
       <div className="env-card-icon">🏛️</div>
@@ -212,9 +212,14 @@ const AccountCard = ({ env, onDeposit }: { env: EnvelopRow; onDeposit: () => voi
     <div className="env-account-right">
       <div className="env-account-balance">{fmt(env.last_balance)}</div>
       {fmtDate(env.last_date) && <div className="env-card-date">Updated {fmtDate(env.last_date)}</div>}
-      <button id={`acc-deposit-${env.id}`} className="card-action-btn topup" style={{ marginTop: '8px' }} onClick={onDeposit}>
-        + Credit
-      </button>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+        <button id={`acc-deposit-${env.id}`} className="card-action-btn topup" style={{ flex: 1 }} onClick={onDeposit}>
+          + Credit
+        </button>
+        <button id={`acc-transfer-${env.id}`} className="xp-icon-btn" onClick={onTopup} title="Transfer In" style={{ borderColor: 'rgba(56,189,248,0.3)', color: '#38bdf8', padding: '0 10px', height: '36px' }}>
+          💰
+        </button>
+      </div>
     </div>
   </div>
 )
@@ -465,7 +470,7 @@ const EnvelopCard = ({ env, allEnvelops, onTransactionDone }: {
 
   return (
     <>
-      {env.type === 'Account' && <AccountCard env={env} onDeposit={onDeposit} />}
+      {env.type === 'Account' && <AccountCard env={env} onDeposit={onDeposit} onTopup={onTopup} />}
       {env.type === 'Expense' && <ExpenseCard env={env} onTopup={onTopup} onTransactionDone={done} />}
       {env.type === 'Investment' && <InvestmentCard env={env} onTopup={onTopup} onExpense={onExpense} />}
       {(env.type === 'Income' || env.type === 'Savings' || env.type === 'Lent' || env.type === 'Owe' || env.type === 'Goal') &&
