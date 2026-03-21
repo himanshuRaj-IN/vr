@@ -19,7 +19,7 @@ interface NwPoint {
 // ─── Constants ────────────────────────────────────
 const TYPE_META: Record<string, { icon: string; color: string; sign: 1 | -1 }> = {
   Account:    { icon: '🏦', color: '#38bdf8', sign:  1 },
-  Expense:    { icon: '💸', color: '#f87171', sign:  1 },
+  Expense:    { icon: '💸', color: '#FF2D55', sign:  1 },
   Investment: { icon: '📊', color: '#fbbf24', sign:  1 },
   Savings:    { icon: '🏛️', color: '#7c6ef7', sign:  1 },
   Goal:       { icon: '🎯', color: '#c084fc', sign:  1 },
@@ -109,7 +109,7 @@ const NetWorthChart = ({
   const dateStep = Math.max(1, Math.ceil(history.length / 7))
   const dateLabels = history.filter((_, i) => i % dateStep === 0 || i === history.length - 1)
 
-  const lineColor = currentNw >= 0 ? '#7c6ef7' : '#f87171'
+  const lineColor = currentNw >= 0 ? '#7c6ef7' : '#FF2D55'
 
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     const svg = svgRef.current
@@ -141,7 +141,7 @@ const NetWorthChart = ({
           <div style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#555', marginBottom: '4px' }}>
             NET WORTH
           </div>
-          <div style={{ fontSize: '2.6rem', fontWeight: 900, letterSpacing: '-2px', color: currentNw >= 0 ? '#4ade80' : '#f87171', lineHeight: 1 }}>
+          <div style={{ fontSize: '2.6rem', fontWeight: 900, letterSpacing: '-2px', color: currentNw >= 0 ? '#4ade80' : '#FF2D55', lineHeight: 1 }}>
             ₹{Math.abs(currentNw).toLocaleString('en-IN')}
             {currentNw < 0 && <span style={{ fontSize: '1rem', marginLeft: '8px' }}>deficit</span>}
           </div>
@@ -288,7 +288,7 @@ const NetWorthChart = ({
                       <span className="nw-tooltip-name">{t.txn_name || t.source_name}</span>
                       <span className="nw-tooltip-tag"> · {t.source_name}</span>
                     </div>
-                    <span style={{ color: t.amount >= 0 ? '#4ade80' : '#f87171', fontWeight: 700, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                    <span style={{ color: t.amount >= 0 ? '#4ade80' : '#FF2D55', fontWeight: 700, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {t.amount >= 0 ? '+' : ''}₹{Math.abs(t.amount).toLocaleString('en-IN')}
                     </span>
                   </div>

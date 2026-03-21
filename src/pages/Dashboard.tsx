@@ -11,35 +11,22 @@ const Dashboard = () => {
         {/* Navbar */}
         <nav className="navbar">
           <div className="navbar-brand">
-            <div className="logo-icon">💰</div>
-            Personal Finance
+            <div className="logo-icon" style={{ display: 'flex', alignItems: 'center' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+            Onyx
           </div>
           <div className="navbar-actions">
-            <button
-              id="nav-analytics-btn"
-              className="icon-btn"
-              title="Analytics"
-              onClick={() => navigate('/analytics')}
-            >
-              📊
-            </button>
-            <button
-              id="nav-settings-btn"
-              className="icon-btn"
-              title="Settings"
-              onClick={() => navigate('/settings')}
-            >
-              ⚙️
-            </button>
+            {/* Action buttons removed */}
           </div>
         </nav>
 
         {/* Main Content */}
-        <div className="page">
-          <div className="page-heading">
-            <h1>Dashboard</h1>
-          </div>
-
+        <div className="page" style={{ paddingTop: '16px' }}>
           {/* Envelop Jars */}
           <EnvelopJars />
         </div>

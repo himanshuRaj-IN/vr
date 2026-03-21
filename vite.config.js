@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: {
-        name: 'React App PWA',
-        short_name: 'ReactPWA',
-        description: 'Progressive Web App built with Vite and React',
+        name: 'Onyx',
+        short_name: 'Onyx',
+        description: 'Secure Personal Finance App',
         theme_color: '#ffffff',
         icons: [
           {
@@ -31,6 +31,7 @@ export default defineConfig({
     })
   ],
   server: {
+    host: true,
     proxy: {
       '/api': {
         target: 'https://vr-pied-five.vercel.app',

@@ -10,27 +10,75 @@
 }
 
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface-hover: #22263a;
-  --border: rgba(255, 255, 255, 0.07);
-  --primary: #7c6ef7;
-  --primary-hover: #9386ff;
-  --text: #f0f0f5;
-  --muted: #8888a8;
-  --success: #4ade80;
-  --error: #f87171;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --bg: #000000;
+  --surface: #111111;
+  --surface-hover: #1c1c1e;
+  --border: rgba(255, 255, 255, 0.15);
+  --primary: #FF2D55;
+  --primary-hover: #FF375F;
+  --text: #ffffff;
+  --muted: rgba(235, 235, 245, 0.6);
+  --success: #30D158;
+  --error: #FF453A;
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Webkit browsers globally to mimic native app on touch, but show slim scrollbars on desktop */
+@media (hover: none) and (pointer: coarse) {
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+    -webkit-appearance: none !important;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 8px;
+  }
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  padding-top: var(--safe-area-top);
+  padding-bottom: calc(var(--safe-area-bottom) + 70px);
 }
 
 /* ===========================
@@ -40,14 +88,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
-  height: 64px;
-  background: var(--surface);
+  padding: 0 20px;
+  height: 54px;
+  background: rgba(17, 17, 17, 0.75);
   border-bottom: 1px solid var(--border);
   position: sticky;
-  top: 0;
+  top: var(--safe-area-top);
   z-index: 10;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
 }
 
 .navbar-brand {
@@ -102,9 +151,10 @@ body {
    Page Layout
    =========================== */
 .page {
-  padding: 32px 28px;
-  max-width: 1100px;
-  margin: 0 auto;
+  padding: 16px;
+  max-width: 100vw;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 /* ===========================
@@ -450,7 +500,7 @@ body {
 }
 
 .status-err {
-  background: rgba(248, 113, 113, 0.15);
+  background: rgba(255, 45, 85, 0.15);
   color: var(--error);
 }
 
@@ -599,8 +649,8 @@ pre.response-json {
 }
 
 .badge.expense {
-  background: rgba(248, 113, 113, 0.15);
-  color: #f87171;
+  background: rgba(255, 45, 85, 0.15);
+  color: #FF2D55;
 }
 
 .badge.income {
@@ -644,9 +694,9 @@ pre.response-json {
 }
 
 .flash-err {
-  background: rgba(248, 113, 113, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  background: rgba(255, 45, 85, 0.12);
+  color: #FF2D55;
+  border: 1px solid rgba(255, 45, 85, 0.2);
 }
 
 .loading-text,
@@ -705,12 +755,35 @@ pre.response-json {
   -ms-overflow-style: none;
 }
 
-/* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
-.envelop-row-scroll::-webkit-scrollbar {
-  display: none;
+/* Hide scrollbar on touch devices, but style it elegantly for desktop mice */
+@media (hover: none) and (pointer: coarse) {
+  .envelop-row-scroll::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+    -webkit-appearance: none !important;
+  }
 }
 
-/* Card columns fixed to 310px (so ~3.5 cards fit natively, hinting at scroll) */
+@media (hover: hover) and (pointer: fine) {
+  .envelop-row-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .envelop-row-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+  }
+  .envelop-row-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+  .envelop-row-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+/* Enhanced 2-row layout for mobile to show 1 stacked column (2 cards vertically) */
 .jars-grid,
 .jars-grid-account,
 .jars-grid-expense,
@@ -718,9 +791,33 @@ pre.response-json {
 .jars-grid-default {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 310px;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-columns: calc(88vw - 32px);
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Specifically for Account and Savings cards: single row, natural height */
+.jars-grid-account,
+.jars-grid-savings {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: 1fr;
+  grid-auto-columns: calc(88vw - 32px);
   gap: 16px;
   align-items: start;
+}
+
+@media (min-width: 600px) {
+  .jars-grid,
+  .jars-grid-account,
+  .jars-grid-expense,
+  .jars-grid-savings,
+  .jars-grid-default {
+    grid-template-rows: 1fr;
+    grid-auto-columns: 310px;
+    gap: 16px;
+  }
 }
 
 /* ── Jar shape ─────────────────────────── */
@@ -734,7 +831,7 @@ pre.response-json {
 }
 
 .jar-card:hover {
-  transform: translateY(-4px);
+  /* Removed translateY lift to prevent scroll freeze on touch */
 }
 
 /* Jar lid */
@@ -913,8 +1010,8 @@ pre.response-json {
 }
 
 .jar-action-btn.expense:hover {
-  background: rgba(248, 113, 113, 0.15);
-  border-color: #f87171;
+  background: rgba(255, 45, 85, 0.15);
+  border-color: #FF2D55;
 }
 
 /* ===========================
@@ -982,9 +1079,9 @@ pre.response-json {
 }
 
 .adj-selected-neg {
-  background: rgba(248, 113, 113, 0.12);
-  border-color: #f87171;
-  color: #f87171;
+  background: rgba(255, 45, 85, 0.12);
+  border-color: #FF2D55;
+  color: #FF2D55;
 }
 
 .adj-name-preview {
@@ -1093,13 +1190,19 @@ pre.response-json {
   border-radius: var(--radius);
   padding: 22px 24px;
   transition: border-color 0.2s, transform 0.2s;
-  min-height: 375px;
+  height: 100%; /* Stretch to row height if grid dictates, otherwise fit content */
   display: flex;
   flex-direction: column;
 }
 
+.env-account, .env-default {
+  height: auto; /* Allow non-expense cards to strictly fit their content */
+  min-height: 0;
+}
+
 .env-card:hover {
-  transform: translateY(-2px);
+  /* Removed translateY lift to prevent scroll freeze on touch */
+  border-color: rgba(255,255,255,0.12);
 }
 
 .env-card-icon {
@@ -1172,11 +1275,11 @@ pre.response-json {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border-color: rgba(248, 113, 113, 0.25);
+  border-color: rgba(255, 45, 85, 0.25);
 }
 
 .env-expense:hover {
-  border-color: #f87171;
+  border-color: #FF2D55;
 }
 
 .env-expense-header {
@@ -1195,8 +1298,8 @@ pre.response-json {
 .env-balance-pill {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #f87171;
-  background: rgba(248, 113, 113, 0.1);
+  color: #FF2D55;
+  background: rgba(255, 45, 85, 0.1);
   border-radius: 999px;
   padding: 3px 12px;
   white-space: nowrap;
@@ -1307,9 +1410,9 @@ pre.response-json {
 }
 
 .card-action-btn.expense:hover {
-  background: rgba(248, 113, 113, 0.12);
-  border-color: #f87171;
-  color: #f87171;
+  background: rgba(255, 45, 85, 0.12);
+  border-color: #FF2D55;
+  color: #FF2D55;
 }
 
 /* ===========================
@@ -1317,18 +1420,23 @@ pre.response-json {
    =========================== */
 .xp-card {
   position: relative;
-  min-height: 375px;
+  min-height: 280px;
   border-radius: var(--radius);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(to bottom, rgba(52, 211, 153, 0.12) 0%, rgba(52, 211, 153, 0.02) 100%);
+  border: 1px solid rgba(255, 45, 85, 0.18);
+  background: linear-gradient(135deg, rgba(255, 45, 85, 0.10) 0%, rgba(120, 0, 40, 0.06) 100%);
   background-color: var(--surface);
   overflow: hidden;
-  transition: transform 0.25s;
+  transition: border-color 0.25s;
+}
+
+@media (min-width: 600px) {
+  .xp-card {
+    min-height: 375px;
+  }
 }
 
 .xp-card:hover {
   border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-4px);
 }
 
 .xp-fill {
@@ -1336,7 +1444,7 @@ pre.response-json {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(248, 113, 113, 0.45) 0%, rgba(248, 113, 113, 0) 100%);
+  background: linear-gradient(to top, rgba(255, 45, 85, 0.45) 0%, rgba(255, 45, 85, 0) 100%);
   transition: height 1.1s cubic-bezier(0.34, 1.2, 0.64, 1);
   pointer-events: none;
 }
@@ -1346,11 +1454,29 @@ pre.response-json {
   position: relative;
   z-index: 1;
   height: 100%;
-  min-height: 375px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 22px 24px;
+  padding: 18px 20px;
+}
+
+@media (min-width: 600px) {
+  .xp-content {
+    min-height: 375px;
+    padding: 22px 24px;
+  }
+}
+
+/* Mobile proportionate scaling for all card text/buttons */
+@media (max-width: 600px) {
+  .env-card-name, .xp-name { font-size: 0.9rem; }
+  .env-default-balance, .xp-balance, .env-account-balance { font-size: 1.1rem; }
+  .xp-pct { font-size: 2rem; }
+  .card-action-btn { font-size: 0.8rem; padding: 8px 10px; }
+  .xp-icon-btn { width: 34px; height: 34px; }
+  .env-card-tag { font-size: 0.72rem; padding: 3px 8px; }
+  .env-default { padding: 18px; }
 }
 
 /* Top: name + balance */
@@ -1385,7 +1511,7 @@ pre.response-json {
   flex: 1;
   padding: 9px 6px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(255, 45, 85, 0.2);
   background: rgba(0, 0, 0, 0.35);
   color: rgba(255, 255, 255, 0.85);
   font-size: 0.8rem;
@@ -1402,9 +1528,9 @@ pre.response-json {
 }
 
 .xp-expense:hover {
-  background: rgba(248, 113, 113, 0.25);
-  border-color: #f87171;
-  color: #f87171;
+  background: rgba(255, 45, 85, 0.25);
+  border-color: #FF2D55;
+  color: #FF2D55;
 }
 
 /* Bottom: spend % left · timeframe right */
@@ -1493,31 +1619,29 @@ pre.response-json {
 }
 
 .xp-center-btn {
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  background: rgba(255, 45, 85, 0.15);
+  border: 1px solid rgba(255, 45, 85, 0.3);
+  border-radius: 999px;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-size: 28px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  /* Organic floating motion */
-  animation: floatWander 8s ease-in-out infinite;
-  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FF2D55;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s;
 }
 
 .xp-center-btn:hover {
-  background: rgba(248, 113, 113, 0.25);
-  border-color: #f87171;
-  box-shadow: 0 8px 25px rgba(248, 113, 113, 0.25);
-  /* Stop wandering and snap to center scale when hovered */
-  animation-play-state: paused;
-  transform: scale(1.15) !important;
+  background: rgba(255, 45, 85, 0.25);
+  border-color: rgba(255, 45, 85, 0.5);
+  box-shadow: 0 6px 20px rgba(255, 45, 85, 0.25);
+  transform: translateY(-2px);
 }
 
 /* ===========================
@@ -1538,7 +1662,7 @@ pre.response-json {
 }
 
 .xp-inline-error {
-  color: #f87171;
+  color: #FF2D55;
   font-size: 0.75rem;
   text-align: center;
 }
@@ -1575,7 +1699,7 @@ pre.response-json {
 
 .xp-inline-inputs input:focus {
   outline: none;
-  border-color: rgba(248, 113, 113, 0.5);
+  border-color: rgba(255, 45, 85, 0.5);
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -1610,13 +1734,71 @@ pre.response-json {
 }
 
 .xp-inline-submit {
-  background: rgba(248, 113, 113, 0.2);
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  background: rgba(255, 45, 85, 0.2);
+  color: #FF2D55;
+  border: 1px solid rgba(255, 45, 85, 0.3);
 }
 
 .xp-inline-submit:hover {
-  background: rgba(248, 113, 113, 0.35);
+  background: rgba(255, 45, 85, 0.35);
+}
+
+/* Slide to confirm mobile component */
+.desktop-only-btn {
+  display: flex;
+}
+.mobile-only-slider-container {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .desktop-only-btn {
+    display: none;
+  }
+  .mobile-only-slider-container {
+    display: flex;
+    flex: 1;
+    position: relative;
+    height: 36px;
+    background: rgba(255, 45, 85, 0.1);
+    border-radius: 18px;
+    align-items: center;
+    border: 1px solid rgba(255, 45, 85, 0.25);
+    overflow: hidden;
+  }
+  .slider-hint {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #FF2D55;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .xp-confirm-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    outline: none;
+    margin: 0;
+    z-index: 3;
+  }
+  .xp-confirm-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #FF2D55;
+    cursor: grab;
+    transform: scale(0.9);
+    transition: transform 0.1s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .xp-confirm-slider:active::-webkit-slider-thumb {
+    transform: scale(1.05);
+  }
 }
 
 /* ===========================
